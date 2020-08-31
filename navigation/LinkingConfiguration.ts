@@ -12,6 +12,10 @@ export default {
           CarScreen: 'Car'
         }
       },
+      Auth: {
+        LoginScreen: 'Login',
+        RegisterScreen: 'Register'
+      },
       NotFound: '*'
     }
   }

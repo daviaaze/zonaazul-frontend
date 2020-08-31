@@ -5,9 +5,19 @@ export type RootStackParamList = {
   NotFound: undefined;
 };
 
-export type DrawerParamList = {
+export type UserDrawerParamList = {
   Home: undefined;
   Active: undefined;
   History: undefined;
   Cars: undefined;
 };
+
+export type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
+};
+
+export type SellerStackParamList = {
+  Dashboard: undefined;
+  Sales: undefined
+}

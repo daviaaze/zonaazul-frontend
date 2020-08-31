@@ -2,11 +2,12 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { createStackNavigator } from '@react-navigation/stack'
 import * as React from 'react'
 import { ColorSchemeName } from 'react-native'
-
 import NotFoundScreen from '../screens/NotFoundScreen'
 import { RootStackParamList } from '../types'
-import DrawerNavigator from './DrawerNavigator'
+import UserDrawerNavigator from './UserDrawerNavigator'
 import LinkingConfiguration from './LinkingConfiguration'
+import AuthStackNavigator from './AuthStackNavigator'
+import SellerStackNavigator from './SellerDrawerNavigator'
 
 // If you are not familiar with React Navigation, we recommend going through the
 // "Fundamentals" guide: https://reactnavigation.org/docs/getting-started
@@ -26,10 +27,11 @@ const Stack = createStackNavigator<RootStackParamList>()
 
 function RootNavigator () {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Auth" component={NotFoundScreen} />
-      <Stack.Screen name="User" component={DrawerNavigator} />
-      <Stack.Screen name="Seller" component={NotFoundScreen} />
+    <Stack.Navigator initialRouteName={true ? (true ? 'User' : 'Seller') : 'Auth'} screenOptions={{ headerShown: false }}>
+      {true ? (true
+        ? <Stack.Screen name="User" component={UserDrawerNavigator} />
+        : <Stack.Screen name="Seller" component={SellerStackNavigator} />)
+        : <Stack.Screen name="Auth" component={AuthStackNavigator} /> }
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
     </Stack.Navigator>
   )
