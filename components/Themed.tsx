@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useEffect, useRef, useCallback } from 'react'
 import { Text as DefaultText, View as DefaultView, TextInput as DefaultTextInput, TextInputProps, StyleSheet } from 'react-native'
 
 import { MaterialIcons as DefaultIcon } from '@expo/vector-icons'
@@ -60,10 +60,10 @@ export function Input (props: InputProps) {
   const { name, onChangeText, rawValue, ...rest } = props
   const { style, lightColor, darkColor, ...otherProps } = rest
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text')
-  const inputRef = React.useRef<DefaultTextInput>(null)
+  const inputRef = useRef<TextInputRef>(null)
   const { fieldName, registerField, defaultValue, error, clearError } = useField(name)
 
-  const handleOnChange = React.useCallback(
+  const handleOnChange = useCallback(
     text => {
       if (inputRef.current) inputRef.current.value = text
       if (onChangeText) onChangeText(text)
@@ -71,20 +71,20 @@ export function Input (props: InputProps) {
     [onChangeText]
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     registerField({
       name: fieldName,
-      ref: inputRef.current,
       path: 'value',
+      ref: inputRef.current,
       clearValue (ref) {
         ref.value = ''
         ref.clear()
       },
       setValue (ref, value) {
         ref.setNativeProps({ text: value })
-        inputRef.current.value = value
+        if (inputRef.current) inputRef.current.value = value
       },
-      getValue (ref) {
+      getValue (ref: { value: any }) {
         return rawValue || ref.value
       }
     })

@@ -6,13 +6,14 @@ import { Form } from '@unform/mobile'
 import * as Yup from 'yup'
 
 import { Text, View, Input, Box } from '../../components/Themed'
+import { AuthStackProps } from '../../types'
 
 interface FormData {
   name: string;
   email: string;
 }
 
-export default function LoginScreen ({ navigation }) {
+export default function LoginScreen ({ navigation }: AuthStackProps) {
   const formRef = React.useRef<FormHandles>(null)
 
   const handleSubmit: SubmitHandler<FormData> = async (data) => {

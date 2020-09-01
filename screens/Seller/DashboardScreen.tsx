@@ -6,17 +6,6 @@ import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler'
 export default function DashboardScreen () {
   const list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
   const [search, setSearch] = React.useState('')
-  if (false) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Nenhum Estacionamento ativo</Text>
-        <Icon name='local-parking' size={180} style={styles.parkIcon} />
-        <TouchableOpacity activeOpacity={0.8} style={styles.button} >
-          <Text style={styles.buttonText}>Estacionar</Text>
-        </TouchableOpacity>
-      </View>
-    )
-  }
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem Vindo!</Text>

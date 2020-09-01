@@ -13,7 +13,11 @@ interface FormData {
   ammount: number;
 }
 
-export default function LoginScreen ({ navigation }) {
+interface ValidationType {
+  [index: string]: string
+}
+
+export default function LoginScreen () {
   const formRef = React.useRef<FormHandles>(null)
 
   const handleSubmit: SubmitHandler<FormData> = async (data) => {
@@ -51,7 +55,7 @@ export default function LoginScreen ({ navigation }) {
       }
       console.log(data)
     } catch (err) {
-      const validationErrors = {}
+      const validationErrors: ValidationType = {}
       if (err instanceof Yup.ValidationError) {
         err.inner.forEach(error => {
           validationErrors[error.path] = error.message

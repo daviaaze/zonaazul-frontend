@@ -5,7 +5,7 @@ import { ColorSchemeName } from 'react-native'
 import NotFoundScreen from '../screens/NotFoundScreen'
 import { RootStackParamList } from '../types'
 import UserDrawerNavigator from './UserDrawerNavigator'
-import LinkingConfiguration from './LinkingConfiguration'
+import { LinkingConfiguration } from './LinkingConfiguration'
 import AuthStackNavigator from './AuthStackNavigator'
 import SellerStackNavigator from './SellerDrawerNavigator'
 
