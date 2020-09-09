@@ -7,15 +7,28 @@ import { Form } from '@unform/mobile'
 import { Text, View, Input, Box, Icon } from '../../components/Themed'
 import InputMask from '../../components/InputMask'
 
+import { register } from '../../services/user'
+import AsyncStorage from '@react-native-community/async-storage'
+import { AuthContext } from '../../hooks/AuthContext'
+import api from '../../services/api'
+
+interface registerData {
+  name: string,
+  email: string,
+  password: string,
+  cpf: string
+}
+
 export default function RegisterScreen ({ navigation }) {
   const [hidden, setHidden] = React.useState(true)
   const [hiddenConfirm, setHiddenConfirm] = React.useState(true)
   const formRef = React.useRef<FormHandles>(null)
+  const { setUser } = React.useContext(AuthContext)
 
-  const handleSubmit: SubmitHandler<FormData> = async (data) => {
+  const handleSubmit: SubmitHandler<registerData> = async (data) => {
     console.log(data)
     try {
-      formRef.current.setErrors({})
+      formRef.current?.setErrors({})
 
       const schema = Yup.object().shape({
         name: Yup.string().required('Nome é um campo obrigatório'),
@@ -30,14 +43,24 @@ export default function RegisterScreen ({ navigation }) {
         abortEarly: false
       })
       // Validation passed
-      console.log(data)
+      try {
+        const response = await register(data)
+
+        setUser(response.data.user)
+        await AsyncStorage.setItem('@zonaAzul:User', JSON.stringify(response.data.user))
+        await AsyncStorage.setItem('@zonaAzul:token', response.data.token)
+
+        api.defaults.headers.Authorization = `Bearer ${response.data.token}`
+      } catch (err) {
+
+      }
     } catch (err) {
       const validationErrors = {}
       if (err instanceof Yup.ValidationError) {
         err.inner.forEach(error => {
           validationErrors[error.path] = error.message
         })
-        formRef.current.setErrors(validationErrors)
+        formRef.current?.setErrors(validationErrors)
         console.log(err)
       }
       console.log(err)

@@ -30,6 +30,7 @@ type DefaultIconProps = {
   name: string;
   style?: object;
   size: number;
+  color: string
 }
 
 type DefaultInputProps = {
@@ -60,7 +61,8 @@ export function Input (props: InputProps) {
   const { name, onChangeText, rawValue, ...rest } = props
   const { style, lightColor, darkColor, ...otherProps } = rest
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text')
-  const inputRef = useRef<TextInputRef>(null)
+  const borderColor = useThemeColor({ light: lightColor, dark: darkColor }, 'border')
+  const inputRef = useRef(null)
   const { fieldName, registerField, defaultValue, error, clearError } = useField(name)
 
   const handleOnChange = useCallback(
@@ -98,7 +100,7 @@ export function Input (props: InputProps) {
         onFocus={clearError}
         placeholderTextColor="#666360"
         onChangeText={handleOnChange}
-        style={[{ color }, style]}
+        style={[{ color, borderColor, borderWidth: 2 }, style]}
         {...otherProps} />
       {error && <Text style={styles.error}>{error}</Text>}
     </>)
@@ -115,7 +117,7 @@ export function Box (props: ViewProps) {
   const { style, lightColor, darkColor, ...otherProps } = props
   const borderColor = useThemeColor({ light: lightColor, dark: darkColor }, 'border')
 
-  return <DefaultView style={[{ borderColor }, style]} {...otherProps} />
+  return <DefaultView style={[{ borderColor, borderWidth: 2 }, style]} {...otherProps} />
 }
 
 export function View (props: ViewProps) {

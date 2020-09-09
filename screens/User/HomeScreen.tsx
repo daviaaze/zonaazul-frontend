@@ -1,21 +1,67 @@
 import * as React from 'react'
-import { StyleSheet, TouchableOpacity } from 'react-native'
-import { } from '@expo/vector-icons'
+import { StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
+import CarBox from '../../components/CarBox'
 
-import { Text, View, Box } from '../../components/Themed'
+import { Text, View, Box, Input, Icon } from '../../components/Themed'
+import { AuthContext } from '../../hooks/AuthContext'
+import { getCars, registerCar } from '../../services/user'
+import { Form } from '@unform/mobile'
+import { FormHandles } from '@unform/core'
+
+interface carList {
+  cars: {
+    plate: string,
+    model: string,
+  }[]
+}
 
 export default function HomeScreen () {
+  const [carId, setCarId] = React.useState(0)
+  const [loading, setLoading] = React.useState(true)
+  const [cars, setCars] = React.useState<carList | null>(null)
+  const { user } = React.useContext(AuthContext)
+  const formRef = React.useRef<FormHandles>(null)
+
+  React.useEffect(() => {
+    async function loadCarData () {
+      setCars((await getCars()).data)
+    }
+    loadCarData()
+    console.log(cars)
+    setLoading(false)
+  }, [])
+
+  function handleSubmit (data) {
+    try {
+      registerCar(data)
+    } catch (err) {
+      console.warn(err)
+    }
+  }
+
+  if (loading) return <ActivityIndicator size='large' style={{ justifyContent: 'center', flex: 1 }} />
+
   return (
     <View style={styles.container}>
-      <Text style={styles.counter}>Seu Saldo é: 0</Text>
+      <Text style={styles.counter}>Seu Saldo é: {user?.wallet}</Text>
       <View style={styles.parkForm}>
         <View style={styles.selectionSection}>
           <Text style={styles.title}>Selecionar o Carro:</Text>
           <View style={styles.separator} />
-          <Box style={styles.box}>
-            <Text style={styles.model}>Astra</Text>
-            <Text style={styles.plate}>DDS-9153</Text>
-          </Box>
+          <View>
+            {(cars !== null && cars?.cars.length !== 0)
+              ? <CarBox car={cars.cars[carId]} />
+              : <Box style={styles.carBox}>
+                <Form ref={formRef} onSubmit={handleSubmit} style={styles.form}>
+                  <Input name='model' returnKeyType={'next'} placeholder='modelo' style={styles.carInput} />
+                  <Input name='plate' returnKeyType={'done'} autoCapitalize='characters' placeholder='placa' style={styles.carInput}/>
+                </Form>
+                <TouchableOpacity style={styles.carButton} onPress={() => formRef.current?.submitForm()}>
+                  <Text>Adicionar</Text>
+                </TouchableOpacity>
+              </Box>}
+            {(cars.cars.length > 1) ? <Icon name='swap-horiz' size={24} color='black' /> : null}
+          </View>
         </View>
         <View style={styles.selectionSection}>
           <Text style={styles.title}>Selecionar o Periodo:</Text>
@@ -67,15 +113,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 20
   },
-  box: {
-    borderRadius: 10,
-    borderWidth: 2,
-    justifyContent: 'center',
-    width: 160,
-    alignContent: 'center',
-    alignItems: 'center',
-    padding: 10
-  },
   boxButtons: {
     height: 60,
     justifyContent: 'center',
@@ -110,19 +147,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 10
   },
-  model: {
-    fontSize: 23
-  },
-  plate: {
-    fontSize: 26,
-    fontWeight: 'bold'
-  },
   buttonText: {
     fontWeight: 'bold',
-    fontSize: 16,
-    color: '#EEE'
+    fontSize: 16
   },
-  parkForm: {
-
+  carInput: {
+    width: 100,
+    marginBottom: 10,
+    textAlign: 'center',
+    borderRadius: 10
+  },
+  carButton: {
+    alignItems: 'center',
+    backgroundColor: 'green',
+    height: 30,
+    borderRadius: 10,
+    width: 100,
+    justifyContent: 'center'
+  },
+  carBox: {
+    width: 250,
+    borderRadius: 20,
+    alignItems: 'center',
+    height: 100,
+    justifyContent: 'center'
+  },
+  form: {
+    flexDirection: 'row',
+    width: 250,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20
   }
 })

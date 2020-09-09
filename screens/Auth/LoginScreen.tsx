@@ -8,16 +8,20 @@ import * as Yup from 'yup'
 import { Text, View, Input, Box } from '../../components/Themed'
 import { AuthStackProps } from '../../types'
 
+import { authenticate } from '../../services/user'
+import { AuthContext } from '../../hooks/AuthContext'
+
 interface FormData {
-  name: string;
   email: string;
+  password: string;
 }
 
 export default function LoginScreen ({ navigation }: AuthStackProps) {
+  const { signIn } = React.useContext(AuthContext)
+
   const formRef = React.useRef<FormHandles>(null)
 
   const handleSubmit: SubmitHandler<FormData> = async (data) => {
-    console.log(data)
     // { email: 'test@example.com', password: '123456' }
     try {
       const schema = Yup.object().shape({
@@ -28,20 +32,25 @@ export default function LoginScreen ({ navigation }: AuthStackProps) {
         abortEarly: false
       })
       // Validation passed
-      console.log(data)
+
+      try {
+        signIn(data)
+      } catch (err) {
+        console.warn(err.message)
+      }
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         // Validation failed
-        console.log(err)
+        console.warn(err.message)
       }
     }
   }
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem Vindo!</Text>
-      <Form ref={formRef} onSubmit={() => {}}>
+      <Form ref={formRef} onSubmit={handleSubmit}>
         <Box style={styles.input}>
-          <Input returnKeyType={'next'} name='email' placeholder='E-mail' />
+          <Input returnKeyType={'next'} name='email' placeholder='E-mail' autoCapitalize='none' />
         </Box>
         <Box style={styles.input}>
           <Input name='password' placeholder='Senha' />
@@ -49,14 +58,14 @@ export default function LoginScreen ({ navigation }: AuthStackProps) {
       </Form>
       <View style={styles.buttons}>
         <View style={styles.buttonField}>
-          <TouchableOpacity activeOpacity={0.4}>
+          <TouchableOpacity activeOpacity={0.4} onPress={() => formRef.current?.submitForm()}>
             <View style={styles.button}>
-              <Text>Entrar</Text>
+              <Text style={styles.buttonText}>Entrar</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Register')} activeOpacity={0.4}>
             <View style={styles.emptyButton}>
-              <Text>Registrar</Text>
+              <Text style={styles.emptyButtonText}>Registrar</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -102,6 +111,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     color: '#EEE'
+  },
+  emptyButtonText: {
+    fontWeight: 'bold',
+    fontSize: 16
   },
   input: {
     marginBottom: 20,

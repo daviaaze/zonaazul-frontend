@@ -1,13 +1,26 @@
 import * as React from 'react'
 import { StyleSheet, TouchableOpacity } from 'react-native'
 import { Text, View, Icon, Box } from '../../components/Themed'
+import Park from '../../components/Park'
+
+interface parksData {
+  parks: {
+    id: string,
+    date: Date,
+    location: Object,
+    duration: number,
+    carId: string,
+    userId: string
+  }[]
+}
 
 export default function HistoryScreen () {
-  if (true) {
+  const [parks, setParks] = React.useState<parksData | null>(null)
+  if (!parks) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Nenhum estacionamento registrado</Text>
-        <Icon name='local-parking' size={180} style={styles.parkIcon} />
+        <Icon name='local-parking' size={180} color='black' style={styles.parkIcon} />
         <TouchableOpacity activeOpacity={0.8} style={styles.button} >
           <Text style={styles.buttonText}>Estacionar</Text>
         </TouchableOpacity>
@@ -17,16 +30,7 @@ export default function HistoryScreen () {
   return (
     <View style={styles.container}>
       <View style={styles.list}>
-        <Box style={styles.box}>
-          <View style={styles.date}>
-            <Text>20:54</Text>
-            <Text>20/11/1999</Text>
-          </View>
-          <View style={styles.car}>
-            <Text>Astra</Text>
-            <Text>DDS-9173</Text>
-          </View>
-        </Box>
+        {parks?.parks.map(park => <Park park={park} key={park.id} />)}
       </View>
     </View>
   )

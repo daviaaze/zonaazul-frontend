@@ -7,6 +7,7 @@ import HomeScreen from '../screens/User/HomeScreen'
 import ActiveScreen from '../screens/User/ActiveScreen'
 import HistoryScreen from '../screens/User/HistoryScreen'
 import CarsScreen from '../screens/User/CarsScreen'
+import { CustomDrawerContent } from '../components/CustomDrawer'
 
 const Drawer = createDrawerNavigator<UserDrawerParamList>()
 
@@ -15,7 +16,9 @@ export default function AuthStackNavigator () {
 
   return (
     <Drawer.Navigator
-      initialRouteName="Home">
+      initialRouteName="Home"
+      drawerContent={props => <CustomDrawerContent {...props} />}
+    >
       <Drawer.Screen component={HomeScreen}
         name="Home"/>
       <Drawer.Screen component={ActiveScreen}

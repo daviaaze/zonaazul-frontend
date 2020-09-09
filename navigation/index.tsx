@@ -8,16 +8,19 @@ import UserDrawerNavigator from './UserDrawerNavigator'
 import { LinkingConfiguration } from './LinkingConfiguration'
 import AuthStackNavigator from './AuthStackNavigator'
 import SellerStackNavigator from './SellerDrawerNavigator'
+import AuthProvider, { AuthContext } from '../hooks/AuthContext'
 
 // If you are not familiar with React Navigation, we recommend going through the
 // "Fundamentals" guide: https://reactnavigation.org/docs/getting-started
 export default function Navigation ({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
-    <NavigationContainer
-      linking={LinkingConfiguration}
-      theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <RootNavigator />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer
+        linking={LinkingConfiguration}
+        theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <RootNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   )
 }
 
@@ -26,9 +29,10 @@ export default function Navigation ({ colorScheme }: { colorScheme: ColorSchemeN
 const Stack = createStackNavigator<RootStackParamList>()
 
 function RootNavigator () {
+  const { signed, user } = React.useContext(AuthContext)
   return (
-    <Stack.Navigator initialRouteName={true ? (true ? 'User' : 'Seller') : 'Auth'} screenOptions={{ headerShown: false }}>
-      {true ? (true
+    <Stack.Navigator initialRouteName={signed ? (user ? 'User' : 'Seller') : 'Auth'} screenOptions={{ headerShown: false }}>
+      {signed ? (user
         ? <Stack.Screen name="User" component={UserDrawerNavigator} />
         : <Stack.Screen name="Seller" component={SellerStackNavigator} />)
         : <Stack.Screen name="Auth" component={AuthStackNavigator} /> }
