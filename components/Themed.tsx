@@ -100,7 +100,7 @@ export function Input (props: InputProps) {
         onFocus={clearError}
         placeholderTextColor="#666360"
         onChangeText={handleOnChange}
-        style={[{ color, borderColor, borderWidth: 2 }, style]}
+        style={[{ color }, style]}
         {...otherProps} />
       {error && <Text style={styles.error}>{error}</Text>}
     </>)

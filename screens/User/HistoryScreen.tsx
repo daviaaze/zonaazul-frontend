@@ -2,6 +2,8 @@ import * as React from 'react'
 import { StyleSheet, TouchableOpacity } from 'react-native'
 import { Text, View, Icon, Box } from '../../components/Themed'
 import Park from '../../components/Park'
+import { AuthContext } from '../../hooks/AuthContext'
+import { UserDrawerProps } from '../../types'
 
 interface parksData {
   parks: {
@@ -14,14 +16,15 @@ interface parksData {
   }[]
 }
 
-export default function HistoryScreen () {
-  const [parks, setParks] = React.useState<parksData | null>(null)
-  if (!parks) {
+export default function HistoryScreen ({ navigation }: UserDrawerProps) {
+  const { parks } = React.useContext(AuthContext)
+
+  if (parks === null || parks.parks.length === 0) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Nenhum estacionamento registrado</Text>
         <Icon name='local-parking' size={180} color='black' style={styles.parkIcon} />
-        <TouchableOpacity activeOpacity={0.8} style={styles.button} >
+        <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={() => navigation.navigate('Home')} >
           <Text style={styles.buttonText}>Estacionar</Text>
         </TouchableOpacity>
       </View>
@@ -30,7 +33,7 @@ export default function HistoryScreen () {
   return (
     <View style={styles.container}>
       <View style={styles.list}>
-        {parks?.parks.map(park => <Park park={park} key={park.id} />)}
+        {parks?.parks.reverse().map(park => <Park park={park} key={park.id} />)}
       </View>
     </View>
   )

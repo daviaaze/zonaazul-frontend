@@ -26,7 +26,6 @@ export default function RegisterScreen ({ navigation }) {
   const { setUser } = React.useContext(AuthContext)
 
   const handleSubmit: SubmitHandler<registerData> = async (data) => {
-    console.log(data)
     try {
       formRef.current?.setErrors({})
 
@@ -61,9 +60,7 @@ export default function RegisterScreen ({ navigation }) {
           validationErrors[error.path] = error.message
         })
         formRef.current?.setErrors(validationErrors)
-        console.log(err)
       }
-      console.log(err)
     }
   }
   return (
@@ -100,7 +97,7 @@ export default function RegisterScreen ({ navigation }) {
               name='password'
               placeholder='Senha'
               blurOnSubmit={false}
-              secureTextEntry={true}
+              secureTextEntry={hidden}
               autoCapitalize='none'
               onSubmitEditing={() => { (formRef.current?.getFieldRef('passwordConfirm')).focus() }} />
           </Box>
@@ -113,7 +110,7 @@ export default function RegisterScreen ({ navigation }) {
             <Input name='passwordConfirm'
               placeholder='Confirmar Senha'
               autoCapitalize='none'
-              secureTextEntry={true}
+              secureTextEntry={hiddenConfirm}
               blurOnSubmit={false}
               onSubmitEditing={() => { formRef.current?.submitForm() }}
             />

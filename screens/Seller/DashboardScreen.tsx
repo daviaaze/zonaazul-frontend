@@ -1,11 +1,49 @@
 import * as React from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, ActivityIndicator } from 'react-native'
 import { Text, View, Icon, Box, TextInput } from '../../components/Themed'
 import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler'
+import Park from '../../components/Seller/Park'
+import { getParks } from '../../services/seller'
+import useInterval from '../../hooks/useInterval'
+
+interface parksData {
+    id: string,
+    CarId: string,
+    date: Date,
+    location: Object,
+    duration: number,
+    userId: string,
+    car: {
+      userId: string,
+      id: string,
+      model: string,
+      plate: string
+    }
+}
 
 export default function DashboardScreen () {
-  const list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
   const [search, setSearch] = React.useState('')
+  const [parks, setParks] = React.useState<parksData[]>()
+
+  async function fetchData () {
+    const response = await getParks()
+    setParks(response.data)
+  }
+
+  useInterval(() => {
+    fetchData()
+  }, 5000)
+  if (!parks) return <ActivityIndicator size={50} style={{ flex: 1, justifyContent: 'center' }} />
+  if (parks.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Bem Vindo!</Text>
+        <Text style={styles.title}>Não há nenhum estacionamento ativo no momento</Text>
+        <Icon name='local-parking' size={180} color='black' style={styles.parkIcon} />
+      </View>
+    )
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem Vindo!</Text>
@@ -15,20 +53,7 @@ export default function DashboardScreen () {
       </Box>
       <View style={styles.list}>
         <ScrollView>
-          {list.map((key) => <Box key={key} style={styles.box}>
-            <View style={styles.date}>
-              <Text>20:50</Text>
-              <Text>20/11/1999</Text>
-            </View>
-            <View style={styles.car}>
-              <Text>Astra</Text>
-              <Text>DDS-9153</Text>
-            </View>
-            <View style={styles.counter}>
-              <Text>9 minutes</Text>
-              <Text>Left</Text>
-            </View>
-          </Box>)}
+          {parks.map((park) => <Park key={park.id} park={park} />)}
         </ScrollView>
       </View>
     </View>
@@ -85,7 +110,9 @@ const styles = StyleSheet.create({
 
   },
   parkIcon: {
-    opacity: 0.3
+    opacity: 0.3,
+    height: '70%'
+
   },
   button: {
     backgroundColor: 'green',

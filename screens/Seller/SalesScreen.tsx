@@ -5,8 +5,10 @@ import { SubmitHandler, FormHandles } from '@unform/core'
 import { Form } from '@unform/mobile'
 import * as Yup from 'yup'
 import InputMask from '../../components/InputMask'
+import AlertAsync from 'react-native-alert-async'
 
 import { Text, View, Input, Box } from '../../components/Themed'
+import { registerBuy } from '../../services/seller'
 
 interface FormData {
   cpf: string;
@@ -22,7 +24,6 @@ export default function LoginScreen () {
 
   const handleSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      console.log(data)
       formRef.current?.setErrors({})
 
       const schema = Yup.object().shape({
@@ -33,9 +34,8 @@ export default function LoginScreen () {
         abortEarly: false
       })
       // Validation passed
-      try {
-        Alert.alert(
-          'Tem Certeza?',
+      const choice = await AlertAsync(
+        'Tem Certeza?',
           ` 
           Adicionar ${data.ammount} creditos
           na conta com
@@ -43,17 +43,27 @@ export default function LoginScreen () {
           , [
             {
               text: 'Cancelar',
-              onPress: () => { throw new Error('Cancelado') },
+              onPress: () => 'Cancelar',
               style: 'cancel'
             },
-            { text: 'OK', onPress: () => console.log('OK Pressed') }
+            { text: 'Sim', onPress: () => 'Sim' }
           ],
           { cancelable: false }
-        )
-      } catch (err) {
-        if (err) return
+      )
+      if (choice === 'Sim') {
+        try {
+          await registerBuy(data)
+          formRef.current?.reset()
+          Alert.alert('Eba',
+            `Adicionado ${data.ammount} credito(s)
+          com sucesso na conta com
+          CPF ${data.cpf.slice(0, 3)}.${data.cpf.slice(3, 6)}.${data.cpf.slice(6, 9)} - ${data.cpf.slice(9, 11)} `)
+        } catch (err) {
+          Alert.alert('Ops', err.message)
+        }
+      } else {
+        return
       }
-      console.log(data)
     } catch (err) {
       const validationErrors: ValidationType = {}
       if (err instanceof Yup.ValidationError) {

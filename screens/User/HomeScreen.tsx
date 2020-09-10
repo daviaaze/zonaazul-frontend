@@ -1,41 +1,47 @@
 import * as React from 'react'
-import { StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import CarBox from '../../components/CarBox'
 
 import { Text, View, Box, Input, Icon } from '../../components/Themed'
 import { AuthContext } from '../../hooks/AuthContext'
-import { getCars, registerCar } from '../../services/user'
+import { getCars, registerCar, registerPark } from '../../services/user'
 import { Form } from '@unform/mobile'
 import { FormHandles } from '@unform/core'
 
-interface carList {
-  cars: {
-    plate: string,
-    model: string,
-  }[]
-}
-
 export default function HomeScreen () {
   const [carId, setCarId] = React.useState(0)
-  const [loading, setLoading] = React.useState(true)
-  const [cars, setCars] = React.useState<carList | null>(null)
-  const { user } = React.useContext(AuthContext)
+  const [buttonOne, setButtonOne] = React.useState(false)
+  const [buttonTwo, setButtonTwo] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
+  const { user, cars, fetchData } = React.useContext(AuthContext)
   const formRef = React.useRef<FormHandles>(null)
 
-  React.useEffect(() => {
-    async function loadCarData () {
-      setCars((await getCars()).data)
-    }
-    loadCarData()
-    console.log(cars)
-    setLoading(false)
-  }, [])
-
-  function handleSubmit (data) {
+  async function handleSubmit (data) {
     try {
-      registerCar(data)
+      await registerCar(data)
+      await fetchData()
     } catch (err) {
-      console.warn(err)
+      Alert.alert('Ops', err.response.message)
+    }
+  }
+
+  async function handlePark () {
+    const duration = buttonOne ? 1 : (buttonTwo ? 2 : null)
+    if (!duration) {
+      Alert.alert('Ops!', 'A duração precisa ser selecionada')
+    } else {
+      const data = {
+        carId: cars.cars[carId].id,
+        duration,
+        location: null
+      }
+      try {
+        await registerPark(data)
+        Alert.alert('Sucesso!', 'Estacionamento registrado com sucessos')
+        await fetchData()
+      } catch (err) {
+        Alert.alert('Ops!', err.message)
+      }
     }
   }
 
@@ -48,39 +54,52 @@ export default function HomeScreen () {
         <View style={styles.selectionSection}>
           <Text style={styles.title}>Selecionar o Carro:</Text>
           <View style={styles.separator} />
-          <View>
-            {(cars !== null && cars?.cars.length !== 0)
+          <View style={styles.carSection}>
+            {(cars !== null && cars.cars?.length > 0)
               ? <CarBox car={cars.cars[carId]} />
               : <Box style={styles.carBox}>
                 <Form ref={formRef} onSubmit={handleSubmit} style={styles.form}>
-                  <Input name='model' returnKeyType={'next'} placeholder='modelo' style={styles.carInput} />
-                  <Input name='plate' returnKeyType={'done'} autoCapitalize='characters' placeholder='placa' style={styles.carInput}/>
+                  <Box style={styles.carInput}>
+                    <Input name='model' returnKeyType={'next'} placeholder='modelo'/>
+                  </Box>
+                  <Box style={styles.carInput}>
+                    <Input name='plate' returnKeyType={'done'} autoCapitalize='characters' placeholder='placa'/>
+                  </Box>
                 </Form>
                 <TouchableOpacity style={styles.carButton} onPress={() => formRef.current?.submitForm()}>
                   <Text>Adicionar</Text>
                 </TouchableOpacity>
               </Box>}
-            {(cars.cars.length > 1) ? <Icon name='swap-horiz' size={24} color='black' /> : null}
+            {(cars !== null && cars.cars?.length > 1) ? (<TouchableOpacity onPress={() => { setCarId((carId < (cars.cars.length - 1)) ? carId + 1 : 0) }}>
+              <Icon name='swap-horiz' size={60} color='black' />
+            </TouchableOpacity>
+            ) : null}
           </View>
         </View>
         <View style={styles.selectionSection}>
           <Text style={styles.title}>Selecionar o Periodo:</Text>
           <View style={styles.separator} />
           <View style={styles.boxButtons}>
-            <TouchableOpacity activeOpacity={0.1} >
-              <Box style={styles.numberButton}>
-                <Text style={styles.number}>1 Hora</Text>
+            <TouchableOpacity activeOpacity={0.1} onPress={() => {
+              setButtonOne(true)
+              setButtonTwo(false)
+            }} >
+              <Box style={buttonOne ? styles.activeNumberButton : styles.numberButton}>
+                <Text style={buttonOne ? styles.activeNumber : styles.number}>1 Hora</Text>
               </Box>
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.1}>
-              <Box style={styles.numberButton}>
-                <Text style={styles.number}>2 Horas</Text>
+            <TouchableOpacity activeOpacity={0.1} onPress={() => {
+              setButtonOne(false)
+              setButtonTwo(true)
+            }}>
+              <Box style={buttonTwo ? styles.activeNumberButton : styles.numberButton}>
+                <Text style={buttonTwo ? styles.activeNumber : styles.number}>2 Horas</Text>
               </Box>
             </TouchableOpacity>
           </View>
         </View>
       </View>
-      <TouchableOpacity activeOpacity={0.8} style={styles.button}>
+      <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={() => handlePark()}>
         <Text style={styles.buttonText}>Estacionar</Text>
       </TouchableOpacity>
     </View>
@@ -134,9 +153,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
+  activeNumberButton: {
+    height: 60,
+    borderWidth: 0,
+    borderRadius: 10,
+    margin: 20,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'green'
+  },
   number: {
     fontSize: 24,
     fontWeight: '100'
+  },
+  activeNumber: {
+    fontSize: 24,
+    fontWeight: '100',
+    color: '#EEE'
   },
   button: {
     backgroundColor: 'green',
@@ -149,7 +183,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: 'bold',
-    fontSize: 16
+    fontSize: 16,
+    color: '#EEE'
   },
   carInput: {
     width: 100,
@@ -177,5 +212,11 @@ const styles = StyleSheet.create({
     width: 250,
     justifyContent: 'space-between',
     paddingHorizontal: 20
+  },
+  carSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 240,
+    justifyContent: 'space-between'
   }
 })

@@ -7,28 +7,40 @@ interface authData {
 
 interface buyData {
   cpf: string,
-  value: number
+  ammount: number
 }
 
 export function authenticate (data: authData) {
-  const response = api.post('/seller/authenticate', {
-    email: data.email,
-    password: data.password
-  })
-  return response
+  try {
+    const response = api.post('/seller/authenticate', {
+      email: data.email,
+      password: data.password
+    })
+    return response
+  } catch (err) {
+    throw new Error(err.response.data.message)
+  }
 }
 
 export function registerBuy (data: buyData) {
-  const response = api.post('/seller/buy/register', {
-    cpf: data.cpf,
-    value: data.value
-  })
+  try {
+    const response = api.post('/seller/buy/register', {
+      cpf: data.cpf,
+      value: data.ammount
+    })
 
-  return response
+    return response
+  } catch (err) {
+    throw new Error(err.response.data.message)
+  }
 }
 
-export function getParks () {
-  const response = api.get('/seller/home')
+export async function getParks () {
+  try {
+    const response = await api.get('/seller/home')
 
-  return response
+    return response
+  } catch (err) {
+    throw new Error(err.response.data.message)
+  }
 }

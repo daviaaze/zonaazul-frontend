@@ -40,6 +40,26 @@ export type UserDrawerParamList = {
   History: undefined;
   Cars: undefined;
 };
+export type CarStackParamList = {
+  Home: undefined;
+  New: undefined;
+};
+type CarHomeScreenRouteProp = RouteProp<CarStackParamList, 'Home'>
+type NewScreenRouteProp = RouteProp<CarStackParamList, 'New'>
+
+type CarHomeScreenNavigationProp = StackNavigationProp<
+  CarStackParamList,
+  'Home'
+>;
+type NewScreenNavigationProp = StackNavigationProp<
+  CarStackParamList,
+  'New'
+>;
+
+export type CarStackProps = {
+  route: CarHomeScreenRouteProp | NewScreenRouteProp;
+  navigation: CarHomeScreenNavigationProp | NewScreenNavigationProp;
+};
 
 type HomeScreenRouteProp = RouteProp<UserDrawerParamList, 'Home'>
 type ActiveScreenRouteProp = RouteProp<UserDrawerParamList, 'Active'>

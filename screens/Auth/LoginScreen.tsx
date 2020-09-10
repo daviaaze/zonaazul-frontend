@@ -1,15 +1,17 @@
 /* eslint-disable react/prop-types */
 import * as React from 'react'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import { SubmitHandler, FormHandles } from '@unform/core'
 import { Form } from '@unform/mobile'
 import * as Yup from 'yup'
 
-import { Text, View, Input, Box } from '../../components/Themed'
+import { Text, View, Input, Box, Icon } from '../../components/Themed'
 import { AuthStackProps } from '../../types'
 
-import { authenticate } from '../../services/user'
 import { AuthContext } from '../../hooks/AuthContext'
+import { authenticate } from '../../services/seller'
+import AsyncStorage from '@react-native-community/async-storage'
+import api from '../../services/api'
 
 interface FormData {
   email: string;
@@ -17,7 +19,8 @@ interface FormData {
 }
 
 export default function LoginScreen ({ navigation }: AuthStackProps) {
-  const { signIn } = React.useContext(AuthContext)
+  const { signIn, setSeller } = React.useContext(AuthContext)
+  const [hidden, setHidden] = React.useState<boolean>(true)
 
   const formRef = React.useRef<FormHandles>(null)
 
@@ -36,15 +39,28 @@ export default function LoginScreen ({ navigation }: AuthStackProps) {
       try {
         signIn(data)
       } catch (err) {
-        console.warn(err.message)
+        Alert.alert('Ops', err.message)
       }
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         // Validation failed
-        console.warn(err.message)
       }
     }
   }
+
+  async function handleSellerLogin () {
+    try {
+      const data = formRef.current?.getData()
+      const response = await authenticate(data)
+      setSeller(response.data.seller)
+      AsyncStorage.setItem('@zonaAzul:Seller', JSON.stringify(response.data.seller))
+      AsyncStorage.setItem('@zonaAzul:token', response.data.token)
+      api.defaults.headers.Authorization = `Bearer ${response.data.token}`
+    } catch (err) {
+      Alert.alert('Ops', err.message)
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem Vindo!</Text>
@@ -52,9 +68,14 @@ export default function LoginScreen ({ navigation }: AuthStackProps) {
         <Box style={styles.input}>
           <Input returnKeyType={'next'} name='email' placeholder='E-mail' autoCapitalize='none' />
         </Box>
-        <Box style={styles.input}>
-          <Input name='password' placeholder='Senha' />
-        </Box>
+        <View style={styles.password}>
+          <Box style={styles.passInput}>
+            <Input name='password' placeholder='Senha' secureTextEntry={hidden} />
+          </Box>
+          <TouchableOpacity activeOpacity={0.4} onPress={() => setHidden(!hidden)}>
+            <Icon name={hidden ? 'visibility' : 'visibility-off'} size={40} />
+          </TouchableOpacity>
+        </View>
       </Form>
       <View style={styles.buttons}>
         <View style={styles.buttonField}>
@@ -69,7 +90,7 @@ export default function LoginScreen ({ navigation }: AuthStackProps) {
             </View>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity activeOpacity={0.4}>
+        <TouchableOpacity activeOpacity={0.4} onPress={() => { handleSellerLogin() }}>
           <Text style={styles.textLink}>Entrar como Vendedor</Text>
         </TouchableOpacity>
       </View>
@@ -117,7 +138,6 @@ const styles = StyleSheet.create({
     fontSize: 16
   },
   input: {
-    marginBottom: 20,
     width: 200,
     borderColor: '#EEE',
     borderWidth: 2,
@@ -135,5 +155,17 @@ const styles = StyleSheet.create({
   textLink: {
     color: '#4287f5',
     marginTop: 10
+  },
+  password: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20
+  },
+  passInput: {
+    width: 150,
+    borderWidth: 2,
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10
   }
 })
