@@ -14,8 +14,8 @@ interface AuthContextData {
   seller: object | null;
   signIn(data:any): Promise<void>;
   signOut(): Promise<void>;
-  setUser(): Function;
-  setSeller(): Function;
+  setUser(user:user): Function;
+  setSeller(seller:seller): Function;
   fetchData(): Function;
   parks: parks | null;
   active: active[] | null;
@@ -31,6 +31,11 @@ interface user {
   email: string,
   cpf: string,
   wallet: number
+}
+interface seller {
+  id: string,
+  name: string,
+  email: string
 }
 interface carList {
   cars: {

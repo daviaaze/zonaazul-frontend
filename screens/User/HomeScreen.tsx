@@ -54,26 +54,28 @@ export default function HomeScreen () {
         <View style={styles.selectionSection}>
           <Text style={styles.title}>Selecionar o Carro:</Text>
           <View style={styles.separator} />
-          <View style={styles.carSection}>
+          <View style={(cars !== null && cars.cars?.length > 1) ? styles.carSection : styles.carSectionOne}>
             {(cars !== null && cars.cars?.length > 0)
               ? <CarBox car={cars.cars[carId]} />
               : <Box style={styles.carBox}>
                 <Form ref={formRef} onSubmit={handleSubmit} style={styles.form}>
                   <Box style={styles.carInput}>
-                    <Input name='model' returnKeyType={'next'} placeholder='modelo'/>
+                    <Input name='model' returnKeyType={'next'} placeholder='modelo' style={styles.input}/>
                   </Box>
                   <Box style={styles.carInput}>
-                    <Input name='plate' returnKeyType={'done'} autoCapitalize='characters' placeholder='placa'/>
+                    <Input name='plate' returnKeyType={'done'} autoCapitalize='characters' style={styles.input} placeholder='placa'/>
                   </Box>
                 </Form>
                 <TouchableOpacity style={styles.carButton} onPress={() => formRef.current?.submitForm()}>
                   <Text>Adicionar</Text>
                 </TouchableOpacity>
               </Box>}
-            {(cars !== null && cars.cars?.length > 1) ? (<TouchableOpacity onPress={() => { setCarId((carId < (cars.cars.length - 1)) ? carId + 1 : 0) }}>
-              <Icon name='swap-horiz' size={60} color='black' />
-            </TouchableOpacity>
-            ) : null}
+            {(cars !== null && cars.cars?.length > 1)
+              ? (
+                <TouchableOpacity onPress={() => { setCarId((carId < (cars.cars.length - 1)) ? carId + 1 : 0) }}>
+                  <Icon name='swap-horiz' size={60} color='black' />
+                </TouchableOpacity>
+              ) : null}
           </View>
         </View>
         <View style={styles.selectionSection}>
@@ -189,7 +191,9 @@ const styles = StyleSheet.create({
   carInput: {
     width: 100,
     marginBottom: 10,
+    height: 40,
     textAlign: 'center',
+    justifyContent: 'center',
     borderRadius: 10
   },
   carButton: {
@@ -218,5 +222,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 240,
     justifyContent: 'space-between'
+  },
+  carSectionOne: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 240,
+    justifyContent: 'center'
+  },
+  input: {
+    textAlign: 'center'
   }
 })

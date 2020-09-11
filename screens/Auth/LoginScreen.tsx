@@ -139,7 +139,6 @@ const styles = StyleSheet.create({
   },
   input: {
     width: 200,
-    borderColor: '#EEE',
     borderWidth: 2,
     borderRadius: 10,
     padding: 10

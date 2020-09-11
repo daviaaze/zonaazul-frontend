@@ -19,13 +19,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.daviaaze.zonaAzul",
+      "buildNumber": "1.0.0"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
     },
     "android": {
-      "package": "com.daviaaze.zonaAzul"
-    }
+      "package": "com.daviaaze.zonaAzul",
+      "versionCode": 1
+    },
+    "description": ""
   }
 }
